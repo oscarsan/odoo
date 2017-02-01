@@ -793,21 +793,26 @@ class Picking(models.Model):
                     for pack in pick.pack_operation_ids:
                         if pack.product_id and pack.product_id.tracking != 'none':
                             raise UserError(_('Some products require lots/serial numbers, so you need to specify those first!'))
-                view = self.env.ref('stock.view_immediate_transfer')
-                wiz = self.env['stock.immediate.transfer'].create({'pick_id': pick.id})
+                # view = self.env.ref('stock.view_immediate_transfer')
+                # wiz = self.env['stock.immediate.transfer'].create({'pick_id': pick.id})
                 # TDE FIXME: a return in a loop, what a good idea. Really.
-                return {
-                    'name': _('Immediate Transfer?'),
-                    'type': 'ir.actions.act_window',
-                    'view_type': 'form',
-                    'view_mode': 'form',
-                    'res_model': 'stock.immediate.transfer',
-                    'views': [(view.id, 'form')],
-                    'view_id': view.id,
-                    'target': 'new',
-                    'res_id': wiz.id,
-                    'context': self.env.context,
-                }
+                #return {
+                #    'name': _('Immediate Transfer?'),
+                #    'type': 'ir.actions.act_window',
+                #    'view_type': 'form',
+                #    'view_mode': 'form',
+                #    'res_model': 'stock.immediate.transfer',
+                #    'views': [(view.id, 'form')],
+                #    'view_id': view.id,
+                #    'target': 'new',
+                #    'res_id': wiz.id,
+                #    'context': self.env.context,
+                #}
+                for pack in pick.pack_operation_ids:
+                    if pack.product_qty > 0:
+                        pack.write({'qty_done': pack.product_qty})
+                    else:
+                        pack.unlink()
 
             # Check backorder should check for other barcodes
             if pick.check_backorder():
